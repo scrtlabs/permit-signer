@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import logo from './logo.svg';
-import {SecretNetworkClient, Permission, Permit} from "secretjs";
+import {SecretNetworkClient, Permission, Permit, validatePermit} from "secretjs";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import { Keplr } from "@keplr-wallet/types";
@@ -70,7 +70,7 @@ function App() {
               </div>
               <div className="form-group">
                   <label htmlFor="setContract"  style={{display: "flex", alignItems: "left"}}>Contract</label>
-                  <input className="form-control" id="setContract" aria-describedby="contract" placeholder="secret1p0vgghl8rw4ukzm7geyy0f0tl29glxrtnlalue."
+                  <input className="form-control" id="setContract" aria-describedby="contract" placeholder="secret1p0vgghl8rw4ukzm7geyy0f0tl29glxrtnlalue"
                          onChange={(event) => {
                              if (event?.target?.value) {
                                  setContract(event.target.value)
@@ -105,6 +105,10 @@ function App() {
 
             const keplrOfflineSigner = (window as unknown as Keplr).getOfflineSignerOnlyAmino(chainId);
 
+            let accts = await keplrOfflineSigner.getAccounts();
+
+            console.log(accts);
+
             let secretjs = await SecretNetworkClient.create({
                 grpcWebUrl: process.env.REACT_APP_GRPC_NODE || "",
                 wallet: keplrOfflineSigner,
@@ -124,11 +128,13 @@ function App() {
                     [contract],
                     permissions.toLowerCase().split(",") as Permission[],
                 );
-                console.log(`hello`);
+
                 console.log(`${JSON.stringify(permit)}`);
-                setPermit(permit);
+                //let res = validatePermit(permit, address, "secret1p0vgghl8rw4ukzm7geyy0f0tl29glxrtnlalue", ["owner"]);
+                let res = secretjs.utils.accessControl.permit.verify(permit, address, contract, ["owner"])
+                setPermit(`permit valid: ${res}`);
             } catch (e) {
-                setPermit(`Failed to signed: ${e}`);
+                setPermit(`Failed to sign: ${e}`);
             }
 
         }}>Sign</button>
