@@ -121,7 +121,7 @@ function App() {
             }
 
             try {
-                let permitPermissions = permissions.toLowerCase().split(",") as Permission[];
+                let permitPermissions = permissions.toLowerCase().replace(/\s/g, "").split(",") as Permission[];
                 let permit = await secretjs.utils.accessControl.permit.sign(
                     address,
                     chainId,
