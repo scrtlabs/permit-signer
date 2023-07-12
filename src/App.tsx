@@ -132,7 +132,7 @@ function App() {
                 // console.log(`${JSON.stringify(permit)}`);
                 //let res = validatePermit(permit, address, "secret1p0vgghl8rw4ukzm7geyy0f0tl29glxrtnlalue", ["owner"]);
 
-                secretjs.utils.accessControl.permit.verify(permit, address, contract, ["owner"])
+                secretjs.utils.accessControl.permit.verify(permit, address, contract, permissions.toLowerCase().split(","))
                 setPermit(permit);
             } catch (e) {
                 setPermit(`Failed to sign: ${e}`);
