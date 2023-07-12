@@ -108,31 +108,32 @@ function App() {
             let accts = await keplrOfflineSigner.getAccounts();
 
             console.log(accts);
-
-            let secretjs = await SecretNetworkClient.create({
-                grpcWebUrl: process.env.REACT_APP_GRPC_NODE || "",
-                wallet: keplrOfflineSigner,
-                walletAddress: address,
-                chainId,
+            let secretjs = new SecretNetworkClient({
+              url: process.env.REACT_APP_LCD_NODE || "",
+              chainId,
+              wallet: keplrOfflineSigner,
+              walletAddress: address
             });
+
             console.log(`secretjs: ${secretjs.address}`)
             if (!secretjs) {
                 setPermit("Failed to initiate keplr");
             }
 
             try {
+                let permitPermissions = permissions.toLowerCase().split(",") as Permission[];
                 let permit = await secretjs.utils.accessControl.permit.sign(
                     address,
                     chainId,
                     permitName,
                     [contract],
-                    permissions.toLowerCase().split(",") as Permission[],
+                    permitPermissions,
                 );
 
                 // console.log(`${JSON.stringify(permit)}`);
                 //let res = validatePermit(permit, address, "secret1p0vgghl8rw4ukzm7geyy0f0tl29glxrtnlalue", ["owner"]);
 
-                secretjs.utils.accessControl.permit.verify(permit, address, contract, permissions.toLowerCase().split(","))
+                secretjs.utils.accessControl.permit.verify(permit, address, contract, permitPermissions);
                 setPermit(permit);
             } catch (e) {
                 setPermit(`Failed to sign: ${e}`);
